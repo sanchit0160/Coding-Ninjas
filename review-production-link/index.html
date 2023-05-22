@@ -14,7 +14,6 @@
 </head>
 <!-- Body-->
 <body class="back-row-toggle splat-toggle">
-
     <section class="content">
         <div class="col-md-12">
             <h10 id="time" style="text-align: left; font-size: 0.5em;"></h10>
@@ -54,24 +53,101 @@
             var total = send.length;
             var rev = 0;
             send.forEach(function(value, index) {
-                setTimeout(function() {
-                    $.ajax({
-                        url: 'code/code.php?list=' + value,
-                        type: 'GET',
-                        async: true,
-                        success: function(output) {
+                const slug = value.split('/').pop();
+
+                const requestOptions = {
+                    method: "GET",
+                    headers: {
+                        "Accept": "application/json, text/plain, */*",
+                        "Origin": "https://www.codingninjas.com",
+                        "Referer": "https://www.codingninjas.com/"
+                    }
+                };
+
+                const url = `https://api.codingninjas.com/api/v3/public_section/resource_details?slug=${slug}`;
+
+                fetch(url, requestOptions)
+                .then(response => {
+                    return response.json();
+                })
+                .then(data => {
+                    const articleId = data.data.article.id;
+                    const articleTitle = data.data.article.title;
+                    let faqs = data.data.article.static_data.faqs;
+                    const metaDescription = data.data.article.static_data.meta_description;
+                    const articleImageUrl = data.data.article.static_data.article_image_url;
+                    const content = data.data.article.content;
+                    const authorId = data.data.article.author.id;
+                    const authorUuid = data.data.article.author.uuid;
+                    const authorName = data.data.article.author.name;
+                    const authorImage = data.data.article.author.image;
+                    const authorScreenName = data.data.article.author.screen_name;
+                    const slug = data.data.article.slug;
+                    const updatedAt = data.data.article.updated_at;
+                    const publishedAt = data.data.article.published_at;
+                    const publishStatus = data.data.article.publish_status;
+                    const upvoteCount = data.data.article.upvote_count;
+                    const isUpvoted = data.data.article.is_upvoted;
+                    const difficultyLevel = data.data.article.difficulty_level;
+                    const breadcrumbs = data.data.article.breadcrumbs;
+                    let placedCategory = breadcrumbs[breadcrumbs.length - 2];
+                    if(placedCategory != undefined) {
+                        placedCategory = placedCategory.name;
+                    }
+
+                    faqs = JSON.stringify(faqs);
+
+                    var payload = {
+                        articleId: articleId,
+                        articleTitle: articleTitle,
+                        faqs: faqs,
+                        metaDescription: metaDescription,
+                        articleImageUrl: articleImageUrl,
+                        content: content,
+                        authorId: authorId,
+                        authorUuid: authorUuid,
+                        authorName: authorName,
+                        authorImage: authorImage,
+                        authorScreenName: authorScreenName,
+                        slug: slug,
+                        updatedAt: updatedAt,
+                        publishedAt: publishedAt,
+                        publishStatus: publishStatus,
+                        upvoteCount: upvoteCount,
+                        isUpvoted: isUpvoted,
+                        difficultyLevel: difficultyLevel,
+                        placedCategory: placedCategory
+                    };
+
+                    var xhr = new XMLHttpRequest();
+                    xhr.open('POST', 'process.php', true);
+                    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+                    
+                    xhr.onreadystatechange = function() {
+                        if (xhr.readyState === XMLHttpRequest.DONE) {
+                            if (xhr.status === 200) {
+                                var response = xhr.responseText;
+                                declined(response);
                                 removeline();
-                                rev++;
-                                reviewed(output + "");
-
-                            $('#cDead').html(rev);
-
-                            $('#loaded').html(total);
-
-                            $('#cDead2').html(rev);
+                                decln++;
+                                var ttl = parseInt(decln);
+                                $('#cDead').html(decln);
+                                $('#total').html(ttl);
+                                $('#loaded').html(total);
+                                $('#cDead2').html(decln);
+                            } 
+                            else {
+                                console.log('Error: ' + xhr.status);
+                            }
                         }
-                    });
-                }, 100 * index);
+
+                    };
+                    
+                    xhr.send('data=' + encodeURIComponent(JSON.stringify(payload)));
+                })
+                .catch(error => {
+                    console.log(error);
+                });
             });
         }
         function reviewed(str) {
