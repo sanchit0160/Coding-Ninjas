@@ -49,6 +49,8 @@ curl_setopt($ch, CURLOPT_POSTFIELDS, "");
 $result = curl_exec($ch);
 
 
+$styleo = '<redmark style="background-color: yellow; color: red;">';
+$stylex = "</redmark>";
 
 $updated_at = trim(strip_tags(getStr($result, '"updated_at":"', '"')));
 $updated_at = date("d-m-Y h:i:sA", strtotime(substr($updated_at, 0, 24)));
@@ -109,9 +111,9 @@ if ($article_meta_title) {
 } else {
     echo "<b>Article Meta Title:</b> NULL → [Keep the meta title field empty]<br>";
 }
+$metadesc = json_decode('"' . $article_meta_description. '"');
+$article_meta_description = str_replace('\n', "" . $styleo . '\n' . $stylex . "", $article_meta_description); 
 
-$article_meta_description = str_replace('\n', "" . $style_open . '\n' . $style_close . "", $article_meta_description); 
-$article_meta_description = json_decode('"' . $article_meta_description. '"');
 if (
     strlen($article_meta_description) < 70 ||
     strlen($article_meta_description) > 160
@@ -121,7 +123,7 @@ if (
         " → [" .
         $style_open .
         "" .
-        strlen($article_meta_description) .
+        strlen($metadesc) .
         " characters" .
         $style_close .
         "] → [Though not critically essential but an ideal length of the meta description should be 70-160 characters]<br>";
@@ -129,7 +131,7 @@ if (
     echo "<b>Article Meta Description:</b> " .
         $article_meta_description .
         " → [" .
-        strlen($article_meta_description) .
+        strlen($metadesc) .
         " characters]<br>";
 }
 
@@ -172,10 +174,10 @@ if($secondLastName) {
     }
     
     if($rightSiblingTitle) {
-        echo "<b>Previous Article:</b> " . $rightSiblingTitle . "<br>";
+        echo "<b>Next Article:</b> " . $rightSiblingTitle . "<br>";
     }
     else {
-        echo $style_open."<b>Previous Article:</b> " . $rightSiblingTitle . "<br>".$style_close;
+        echo $style_open."<b>Next Article:</b> " . $rightSiblingTitle . "<br>".$style_close;
     }
     
     
@@ -298,9 +300,9 @@ for ($array_index = 1; $array_index <= $img_src_count; $array_index++) {
              $height = '<span style="color: red;">'.$height.'</span>';
          }
         
-        if($array_index != 1 && $width > 700) {
-            $width = '<span style="color: red;">'.$width.'</span>';
-        }
+        //if($array_index != 1 && $width > 700) {
+          //  $width = '<span style="color: red;">'.$width.'</span>';
+        //}
         
         
         
@@ -311,7 +313,7 @@ for ($array_index = 1; $array_index <= $img_src_count; $array_index++) {
             $imgSize .
             "KB | Dimensions = " .
             $width .
-            " x " .
+            "x" .
             $height .
             " px</span>";
         if ($imgSize > 100) {
@@ -339,17 +341,17 @@ for ($array_index = 1; $array_index <= $img_src_count; $array_index++) {
         }
          
          
-        if($array_index != 1 && $width > 700) {
-            $width = '<span style="color: red;">'.$width.'</span>';
-        }
+        //if($array_index != 1 && $width > 700) {
+          //  $width = '<span style="color: red;">'.$width.'</span>';
+        //}
         
         echo '<span style="margin-left: 40px;">Size = ' .
             $imgSize .
             "KB | Dimensions = " .
             $width .
-            " x " .
+            "x" .
             $height .
-            " px</span>";
+            "</span>";
         if ($imgSize > 100) {
             echo '<span style="color: red;"> → [Reduce the image size below 100KB]<br></span>';
         }
@@ -469,6 +471,9 @@ for ($array_index = 1; $array_index <= $backlink_count; $array_index++) {
 
 
 echo "<b>Frequently Asked Questions:</b> ";
+echo "<div>------------------------------------------------------------------------------------------------------------------------</div>";
+echo "<i>[Add 1 to the word count for each instances of O(n^aNumber) or O(aNumber).]</i>";
+echo "<div>------------------------------------------------------------------------------------------------------------------------</div>";
 
 $key_count = substr_count($faqs, '":"');
 
@@ -494,12 +499,16 @@ for (
     $qna[$array_index] = trim(
         strip_tags(getStr($qna[$array_index], "sanchit", '"}'))
     );
+    
+    $styleo = '<redmark style="background-color: yellow; color: red;">';
+    $stylex = "</redmark>";
+    
     $qna[$array_index] = str_replace(
         '\n',
-        "" . $style_open . '\n' . $style_close . "",
+        "" . $styleo . '\n' . $stylex . "",
         $qna[$array_index]
     );
-    $qna[$array_index] = json_decode('"' . $qna[$array_index]. '"');
+    //$qna[$array_index] = json_decode('"' . $qna[$array_index]. '"');
     echo '<div style="margin-left: 40px;">⚪' . $qna[$array_index]."</div>";
 
     $ano[$qna_no - 1] = $qna[$array_index - 1];
@@ -508,14 +517,19 @@ for (
     $qna[$array_index - 1] = trim(
         strip_tags(getStr($qna[$array_index - 1], "sanchit", '",'))
     );
+    //echo $qna[$array_index - 1];
+    
+    $answerf = json_decode('"' . $qna[$array_index - 1]. '"');
+    //$words = preg_split('/\s+/', $answerf);
+    $wordCount = str_word_count($answerf);
+    
+    
     $qna[$array_index - 1] = str_replace(
         '\n',
-        "" . $style_open . '\n' . $style_close . "",
+        "" . $styleo . '\n' . $stylex . "",
         $qna[$array_index - 1]
     );
-    $qna[$array_index - 1] = json_decode('"' . $qna[$array_index - 1]. '"');
-    $words = preg_split('/\s+/', $qna[$array_index - 1]);
-    $wordCount = count($words);
+    
     
     
     echo '<div style="margin-left: 40px;">⚫' .
