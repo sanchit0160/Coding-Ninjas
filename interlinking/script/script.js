@@ -8,7 +8,6 @@ if (storedTextValue) {
 	$('#textInput').val(storedTextValue);
 }
 
-
 function submit() {
 	var line = $("#list").val();
 	var href = $("#hrefInput").val();
@@ -18,7 +17,19 @@ function submit() {
 	var send = line.split("\n");
 	var total = send.length;
 	var rev = 0;
-	send.forEach(function(value, index) {
+	var revdec = 0;
+	let temp;
+	send.some(function(value, index) {
+		const linkRegex = /https/;
+		temp = linkRegex.test(value) ? 1 : 0;
+		if(temp == 0) {
+			removeline();
+			return false;
+		}
+
+
+		//console.log(resultList);
+
 		const slug = value.split('/').pop();
 		let requestOptions = {
 			method: "GET",
@@ -27,10 +38,10 @@ function submit() {
 				"Origin": "https://www.codingninjas.com",
 				"Referer": "https://www.codingninjas.com/"
 			},
-			timeout: 12000 //
+			timeout: 100 //
 		};
 
-		const maxRetryAttempts = 3;
+		const maxRetryAttempts = 1;
 		let currentAttempt = 0;
 
 		const fetchWithRetry = () => {
@@ -41,89 +52,94 @@ function submit() {
 			fetch(url, requestOptions)
 			.then(response => {
 				if (!response.ok) {
+					removeline();
 					throw new Error('Network response was not OK');
 				}
 				return response.json();
 			})
 			.then(data => {
 				const content = data.data.article.content;
-				//console.log(content);
 
-				href = href;
-				text = text;
-				const escapedHref = href.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
-				const escapedText = text.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
-				const regex = new RegExp(`<a\\s+href="${escapedHref}"><span[^>]*>(?:<u>${escapedText}<\\/u>|<strong>${escapedText}<\\/strong>|<strong><u>${escapedText}<\\/u><\\/strong>)<\\/span><\\/a>`);
 
-				const regex1 = new RegExp(`<a\\s+href="${href}"><span[^>]*><u>${text}</u></span></a>`);
-				const regex2 = new RegExp(`<a\\s+href="${href}"><span[^>]*><strong>${text}</strong></span></a>`);
-				const regex3 = new RegExp(`<a\\s+href="${href}"><span[^>]*><strong><u>${text}</u></strong></span></a>`);
-				const regex4 = new RegExp(`<a\\s+href="${href}"><span[^>]*>${text}</span></a>`);
-		  		const exists1 = regex1.test(content);
-				const exists2 = regex2.test(content);
-				const exists3 = regex3.test(content);
-		  		const exists4 = regex4.test(content);
-				const exists5 = content.includes(text);
-				if (exists1 || exists2 || exists3 || exists4) {
-					//console.log(`&#9989; - ${value}`);
-					reviewed(`&#9989; - <a href="${value}">${value}</a>`);
+				function searchAndPrintOutput(htmlResponse, searchText) {
+					var tempElement = document.createElement('div');
+					tempElement.innerHTML = htmlResponse;
 
-					var stringsToFind = ['Key takeaways', 'Conclusion', 'Key Takeaways', 'Key Takeaway', 'Key takeaway'];
+					var matches = tempElement.textContent.includes(searchText);
 
-					var startIndex = -1;
-					for (var i = 0; i < stringsToFind.length; i++) {
-					  startIndex = content.indexOf(stringsToFind[i]);
-					  if (startIndex !== -1) {
-					    break;
-					  }
-					}
-					//console.log(startIndex);
+					if (matches) {
+					    var headings = tempElement.querySelectorAll('h1, h2, h3, h4');
+					    var previousHeading = null;
+					    var nextHeading = null;
 
-					trimmedPart = content.substring(startIndex).trim();
-					trimmedPart = trimmedPart.replace(/<img[^>]*>/g, '');
-					reviewed(`<div class="box">${trimmedPart}</div>`);
-					removeline();
-				}
-				else {
-					if(exists5) {
-						reviewed(`&#9888; - <a href="${value}">${value}</a>`);
-						var stringsToFind = ['Key takeaways', 'Conclusion', 'Key Takeaways', 'Key Takeaway', 'Key takeaway'];
-						var startIndex = -1;
-						for (var i = 0; i < stringsToFind.length; i++) {
-						  startIndex = content.indexOf(stringsToFind[i]);
-						  if (startIndex !== -1) {
-						    break;
-						  }
+					    for (var i = 0; i < headings.length; i++) {
+						    var currentHeading = headings[i];
+						    var sibling = currentHeading.nextElementSibling;
+						    while (sibling) {
+						        if (sibling.textContent.includes(searchText)) {
+						            previousHeading = headings[i];
+
+							        nextHeading = headings[i + 1];
+							        break;
+						        }
+
+						    
+						    sibling = sibling.nextElementSibling;
+						    }
+						    //console.log(previousHeading.textContent);
 						}
 
+						startIndex = content.indexOf(previousHeading.textContent);
+						//console.log(startIndex);
 
-						trimmedPart = content.substring(startIndex).trim();
+						if(!nextHeading) {
+							trimmedPart = content.substring(startIndex).trim();
+						}
+						else {
+							targetIndex = content.indexOf(nextHeading.textContent);
+							//console.log(targetIndex);
+							trimmedPart = content.substring(startIndex, targetIndex).trim();
+						}
+						
 						trimmedPart = trimmedPart.replace(/<img[^>]*>/g, '');
+						rev++;
+						reviewed(`&#9989; - <a href="${value}">${value}</a>`);
 						reviewed(`<div class="box">${trimmedPart}</div>`);
 						removeline();
-					}
+
+					} 
 					else {
-						reviewed(`&#10060; - <a style="color: red; text-decoration: underline;" href="${value}">${value}</a>`);
+						revdec++;
+						declined(`&#10060; - <a style="color: red; text-decoration: underline;" href="${value}">${value}</a>`);
 						removeline();
-					}
+				    	//console.log("Text not found.");
+				  	}
 				}
-				rev++;
-				var ttl = parseInt(rev);
+
+
+				var searchText = text;
+				searchAndPrintOutput(content, searchText);
+
+				
+				var ttl = parseInt(rev) + parseInt(revdec);
 				$('#revid').html(rev);
+				$('#reviddec').html(revdec);
 				$('#total').html(ttl);
 				$('#loaded').html(total);
 				$('#revid2').html(rev);
+				$('#revid2dec').html(revdec);
 			})
 			.catch(error => {
+				removeline();
 				if (error.code === 'UND_ERR_CONNECT_TIMEOUT') {
 					console.log('Request timed out');
-					if (currentAttempt <= maxRetryAttempts) {
-						console.log(`Retrying... (Attempt ${currentAttempt} of ${maxRetryAttempts})`);
-						fetchWithRetry();
-						} 
-					else {
-						console.log('Maximum retry attempts reached');
-					}
+					//if (currentAttempt <= maxRetryAttempts) {
+						//console.log(`Retrying... (Attempt ${currentAttempt} of ${maxRetryAttempts})`);
+						//fetchWithRetry();
+						//} 
+					//else {
+						//console.log('Maximum retry attempts reached');
+					//}
 				} 
 				else {
 					console.log('Error:', error.message);
@@ -134,18 +150,12 @@ function submit() {
 		fetchWithRetry();
 	});
 }
-function extractConclusionText(htmlResponse) {
-	const tempElement = document.createElement('div');
-	tempElement.innerHTML = htmlResponse;
-	const conclusionHeading = tempElement.querySelector('h2:contains("Conclusion")');
-	const conclusionText = conclusionHeading.nextSibling.textContent.trim();
-	tempElement.remove();
-
-	return conclusionText;
-}
 
 function reviewed(str) {
 	$(".approved").append(str + "<br>");
+}
+function declined(str) {
+	$(".declined").append(str + "<br>");
 }
 function removeline() {
 	var lines = $("#list").val().split('\n');
