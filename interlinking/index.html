@@ -32,14 +32,16 @@
                         <br><br>
                         <small>
                             <span class="bagde badge-pill badge-light"><strong>STATUS</strong></span>
-                            &nbsp;REVIEWED&nbsp;<span id="revid" class="badge badge-primary">0</span>
+                            &nbsp;Reviewed&nbsp;<span id="total" class="badge badge-primary">0</span>
                             &nbsp;LOADED&nbsp;<span id="loaded" class="badge badge-dark">0</span>
                         </small>
                     </center>
                     <br>
                 </div>
-                <button type="button" id="showdec" onclick="changed_state('display_div');" class="btn btn-primary">Reviewed&nbsp;<span id="revid2">0</span></button>
-                <div id="display_div" style="display:block;"><span id=".approved" class="approved"></span></div><br>
+                <button type="button" id="showdec" onclick="changed_state('display_div');" class="btn btn-success">Approved&nbsp;<span id="revid2">0</span></button><br>
+                <div id="display_div" style="display:none;"><span id=".approved" class="approved"></span></div><br>
+                <button type="button" id="showdec2" onclick="changed_state('display_div');" class="btn btn-danger">Declined&nbsp;<span id="revid2dec">0</span></button>
+                <div id="display_div" style="display:block;"><span id=".declined" class="declined"></span></div><br>
             </div>
         </div>
     </section>
