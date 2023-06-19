@@ -24,7 +24,8 @@ async function submit() {
 
     const linkRegex = /https/;
     const isLink = linkRegex.test(value);
-    if (!isLink || value.includes(href)) {
+
+    if (!isLink || (value.includes(href) && value.length == href.length)) {
       removeline();
       continue;
     }
@@ -52,7 +53,8 @@ async function submit() {
 
       const tempElement = document.createElement('div');
       tempElement.innerHTML = content;
-      const matches = tempElement.textContent.includes(text);
+      
+      const matches = tempElement.innerHTML.includes(`${href}"`);
 
       if (matches) {
         const targetIndex = indexOfHref + text.length + 750;
