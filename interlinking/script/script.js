@@ -18,6 +18,7 @@ async function submit() {
   var total = send.length;
   var rev = 0;
   var revdec = 0;
+  let count = 0;
 
   for (let index = 0; index < send.length; index++) {
     const value = send[index];
@@ -29,6 +30,9 @@ async function submit() {
       removeline();
       continue;
     }
+
+    count++
+
 
     const slug = value.split('/').pop();
     const requestOptions = {
@@ -62,13 +66,13 @@ async function submit() {
         const trimmedPart = content.substring(startIndex, targetIndex).trim()
           .replace(`<a href="${href}">`, `<a style="background-color: yellow;" href="${href}">`);
         rev++;
-        reviewed(`&#9989; <a href="${value}">${value}</a>`);
+        reviewed(`${count}. <a href="${value}">${value}</a>`);
         reviewed(`<div class="box">${trimmedPart}</div>`);
         reviewed(`<br>`);
         removeline();
       } else {
         revdec++;
-        declined(`<a style="color: red; text-decoration: underline;" href="${value}">${value}</a>`);
+        declined(`${count}. <a style="color: red; text-decoration: underline;" href="${value}">${value}</a>`);
         removeline();
       }
 
