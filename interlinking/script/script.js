@@ -58,7 +58,6 @@ async function submit() {
         const targetIndex = indexOfHref + text.length + 750;
         const startIndex = indexOfHref - 2000;
         const trimmedPart = content.substring(startIndex, targetIndex).trim()
-          //.replace(/<img[^>]*>/g, '')
           .replace(`<a href="${href}">`, `<a style="background-color: yellow;" href="${href}">`);
         rev++;
         reviewed(`&#9989; <a href="${value}">${value}</a>`);
@@ -67,7 +66,7 @@ async function submit() {
         removeline();
       } else {
         revdec++;
-        declined(`&#10060; &#8594; <a style="color: red; text-decoration: underline;" href="${value}">${value}</a>`);
+        declined(`<a style="color: red; text-decoration: underline;" href="${value}">${value}</a>`);
         removeline();
       }
 
