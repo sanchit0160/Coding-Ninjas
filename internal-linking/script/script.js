@@ -25,8 +25,9 @@ async function submit() {
 
         const linkRegex = /https/;
         const isLink = linkRegex.test(value);
-
-        if (!isLink || (value.includes(href) && value.length == href.length)) {
+        const isTextAndLink = /^.+https/.test(value)
+        
+        if (!isLink ||  value == href || isTextAndLink) {
             removeline();
             continue;
         }
