@@ -31,7 +31,7 @@ async function submit() {
         value = value.replace(/.*?(https)/, 'https');
         value = value.replace(/(https:\/\/[^ ]*).*/, '$1');
         
-        if (!isLink || temp == 0) {
+        if (!isLink || (value.includes(href) && temp == 0)) {
             removeline();
             continue;
         }
