@@ -4,7 +4,7 @@
 <head>
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Production link reviewer written in JS and php.">
+    <meta name="description" content="Production link reviewer written in JS.">
     <link rel="icon" type="image/png" sizes="16x16" href="images/cn.png">
     <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700,900" rel='stylesheet' type='text/css'>
     <title>Internal Linking</title>
@@ -21,26 +21,32 @@
                 <div class="panel-body">
                     <br>
                     <center>
+                        <div style="display: flex; align-items: center; justify-content: left;">
+                            <input type="checkbox" id="checkBoxID" onchange="updateTempValue()" style="margin-right: 5px;" title="Force check href value if it is present in the input"></input>
+                        </div>
                         <input type="text" id="hrefInput" placeholder="Input href value" class="form-control left-aligned" style="width: 80%;">
-                            <br>
-                            <input type="text" id="textInput" placeholder="Input text associated with href" class="form-control left-aligned" style="width: 80%;">
-                            <br>
-                        <textarea maxlength="14500000000000" id="list" placeholder="Input production links" class="form-control left-aligned" style="resize: none;outline: none; width: 80%;height:150px;"></textarea>
+                        </input>
+                        
                         <br>
-                        <button type="button" id="start_test" onclick="submit()" class="btn btn-outline-primary">Start</button>&nbsp;
+                        <input type="text" id="textInput" placeholder="Input text associated with href" class="form-control left-aligned" style="width: 80%;">
+                        <br>
+                        <textarea maxlength="14500000000000" id="list" placeholder="Input production links" class="form-control left-aligned" style="resize: none; outline: none; width: 80%; height: 150px;"></textarea>
+                        <br>
+                        <button type="button" id="start_test" onclick="submit()" class="btn btn-outline-primary">Start</button>
+                        &nbsp;
                         <button type="button" onclick="stop()" id="stop_test" class="btn btn-outline-dark">Stop</button>
                         <br><br>
                         <small>
-                            <span class="bagde badge-pill badge-light"><strong>STATUS</strong></span>
+                            <span class="badge badge-pill badge-light"><strong>STATUS</strong></span>
                             &nbsp;Reviewed&nbsp;<span id="total" class="badge badge-primary">0</span>
                             &nbsp;LOADED&nbsp;<span id="loaded" class="badge badge-dark">0</span>
                         </small>
                     </center>
                     <br>
                 </div>
-                <button type="button" id="showdec" onclick="changed_state('display_div');" class="btn btn-success">Approved&nbsp;<span id="revid2">0</span></button><br>
+                <button type="button" id="showdec" onclick="changedState('display_div');" class="btn btn-success">Approved&nbsp;<span id="revid2">0</span></button><br>
                 <div id="display_div" style="display:none;"><span id=".approved" class="approved"></span></div><br>
-                <button type="button" id="showdec2" onclick="changed_state('display_div2');" class="btn btn-danger">Declined&nbsp;<span id="revid2dec">0</span></button>
+                <button type="button" id="showdec2" onclick="changedState('display_div2');" class="btn btn-danger">Declined&nbsp;<span id="revid2dec">0</span></button>
                 <div id="display_div2" style="display:block;"><span id=".declined" class="declined"></span></div><br>
             </div>
         </div>

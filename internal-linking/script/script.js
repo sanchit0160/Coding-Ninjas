@@ -20,14 +20,18 @@ async function submit() {
     var revdec = 0;
     let count = 0;
 
-    for (let index = 0; index < send.length; index++) {
-        const value = send[index];
+    var temp = updateTempValue();
 
+    for (let index = 0; index < send.length; index++) {
+        let value = send[index];
+        
         const linkRegex = /https/;
         const isLink = linkRegex.test(value);
-        const isTextAndLink = /^.+https/.test(value)
+
+        value = value.replace(/.*?(https)/, 'https');
+        value = value.replace(/(https:\/\/[^ ]*).*/, '$1');
         
-        if (!isLink ||  value == href || isTextAndLink) {
+        if (!isLink || temp == 0) {
             removeline();
             continue;
         }
@@ -114,12 +118,18 @@ function removeline() {
     $("#list").val(lines.join("\n"));
 }
 
-function changed_state(el) {
+function changedState(el) {
     var display = document.getElementById(el).style.display;
     if (display === "none")
         document.getElementById(el).style.display = 'block';
     else
         document.getElementById(el).style.display = 'none';
+}
+
+function updateTempValue() {
+    var checkbox = document.getElementById("checkBoxID");
+    var temp = checkbox.checked ? 1 : 0;
+    return temp;
 }
 
 var myVar = setInterval(myTimer, 1000);
