@@ -17,11 +17,8 @@ function getStr($string, $start, $end) {
 }
 
 $list = $_GET["list"];
-$slug = str_replace(
-    "https://www.codingninjas.com/codestudio/library/",
-    "",
-    $list
-);
+$path = parse_url($list, PHP_URL_PATH);
+$slug = basename($path);
 
 $ch = curl_init();
 
