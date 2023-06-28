@@ -138,7 +138,6 @@ const getImageDimensions = async (url) => {
 	} catch (error) {
 		throw error;
 	}
-};
 
 async function readability(input) {
 	let readingEaseScore;

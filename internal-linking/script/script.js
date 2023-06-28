@@ -70,10 +70,10 @@ async function submit() {
                 const startIndex = indexOfHref - 2000;
                 const trimmedPart = content.substring(startIndex, targetIndex).trim()
                     .replace(`<a href="${href}">`, `<a style="background-color: yellow;" href="${href}">`);
-                    /*
+                    /**
                       *  Uncomment the next line if you do no want
                       *  images to get rendered 
-                    */
+                      */
                     //.replace(/<img[^>]*>/g, '');
                 rev++;
                 reviewed(`${count}. <a href="${value}">${value}</a>`);
