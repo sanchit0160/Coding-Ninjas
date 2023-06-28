@@ -1,3 +1,5 @@
+// Run this code after deployment
+
 const TelegramBot = require('node-telegram-bot-api');
 const { JSDOM } = require('jsdom');
 require('dotenv').config();
