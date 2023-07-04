@@ -22,13 +22,7 @@ $slug = basename($path);
 
 $ch = curl_init();
 
-curl_setopt(
-    $ch,
-    CURLOPT_URL,
-    "https://api.codingninjas.com/api/v3/public_section/resource_details?slug=" .
-        $slug .
-        ""
-);
+curl_setopt($ch, CURLOPT_URL, "https://api.codingninjas.com/api/v3/public_section/resource_details?slug=".$slug ."");
 
 curl_setopt($ch, CURLOPT_USERAGENT, $_SERVER["HTTP_USER_AGENT"]);
 curl_setopt($ch, CURLOPT_HEADER, 0);
@@ -45,6 +39,38 @@ curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "GET");
 curl_setopt($ch, CURLOPT_POSTFIELDS, "");
 $result = curl_exec($ch);
 
+$json = json_decode($result);
+$content = $json->data->article->content;
+
+
+echo '<a href="'.$list .'">'.$list."</a><br>";
+echo "<div><b>Table of Contents:</b></div>";
+echo '<div class="box">';
+
+
+$headingRegex = '/<h([1-5])[^>]*>(.*?)<\/h[1-5]>/i';
+$headings = [];
+
+preg_match_all($headingRegex, $content, $matches, PREG_SET_ORDER);
+
+foreach ($matches as $match) {
+    $level = $match[1];
+    $name = strip_tags($match[2]);
+    $headings[] = ['level' => $level, 'name' => $name];
+}
+
+
+foreach ($headings as $heading) {
+    $indent = str_repeat('&emsp;', $heading['level'] - 1);
+    $output = '<div>';
+    $output .= $indent . 'H' . $heading['level'] . '. ' . $heading['name'] . '<br>';
+    $output .= '</div>';
+
+    echo $output . "\n";
+}
+
+echo '</div>';
+
 
 $styleo = '<redmark style="background-color: yellow; color: red;">';
 $stylex = "</redmark>";
@@ -59,18 +85,10 @@ $article_title = trim(strip_tags(getStr($result, '"title":"', '"')));
 $article_title = json_decode('"' . $article_title. '"');
 $article_meta_title = trim(strip_tags(getStr($result, '"meta_title":"', '"')));
 $article_meta_title = json_decode('"' . $article_meta_title. '"');
-$article_meta_description = trim(
-    strip_tags(getStr($result, '"meta_description":"', '"'))
-);
-$article_image_url = trim(
-    strip_tags(getStr($result, '"article_image_url":"', '"'))
-);
-
+$article_meta_description = trim(strip_tags(getStr($result, '"meta_description":"', '"')));
+$article_image_url = trim(strip_tags(getStr($result, '"article_image_url":"', '"')));
 $faqs = trim(strip_tags(getStr($result, '"faqs":[', "]")));
-
-$difficulty_level = trim(
-    strip_tags(getStr($result, '"difficulty_level":"', '"'))
-);
+$difficulty_level = trim(strip_tags(getStr($result, '"difficulty_level":"', '"')));
 
 if ($difficulty_level == null) {
     $difficulty_level = "NULL";
@@ -81,7 +99,7 @@ $imagedata = getimagesize($article_image_url);
 $style_open = '<redmark style="color:red">';
 $style_close = "</redmark>";
 
-echo '<a href="'.$list .'">'.$list."</a><br>";
+
 echo '<b>Article ID:</b> <a href="https://admin.codingninjas.com/public_section_articles/' .
     $article_id .
     '/edit">' .
@@ -111,10 +129,7 @@ if ($article_meta_title) {
 $metadesc = json_decode('"' . $article_meta_description. '"');
 $article_meta_description = str_replace('\n', "" . $styleo . '\n' . $stylex . "", $article_meta_description); 
 
-if (
-    strlen($article_meta_description) < 70 ||
-    strlen($article_meta_description) > 160
-) {
+if (strlen($article_meta_description) < 70 || strlen($article_meta_description) > 160) {
     echo "<b>Article Meta Description:</b> " .
         $article_meta_description .
         " → [" .
@@ -124,15 +139,14 @@ if (
         " characters" .
         $style_close .
         "] → [Though not critically essential but an ideal length of the meta description should be 70-160 characters]<br>";
-} else {
+} 
+else {
     echo "<b>Article Meta Description:</b> " .
         $article_meta_description .
         " → [" .
         strlen($metadesc) .
         " characters]<br>";
 }
-
-
 
 $placedCategory = trim(strip_tags(getStr($result, '"breadcrumbs":', '},"')));
 
@@ -175,91 +189,84 @@ if($secondLastName) {
     }
     else {
         echo $style_open."<b>Next Article:</b> " . $rightSiblingTitle . "<br>".$style_close;
-    }
-    
-    
-    
+    }  
 }
 else {
     echo $style_open."<b>Placed Category:</b> " .$secondLastName."<br>".$style_close;
 }
 
-
-
 if ($article_image_url) {
     for ($array_index = 0; $array_index <= 1; $array_index++) {
         $img_data[$array_index] = multiexplode(["src="], $result)[$array_index];
-	}
-	$x = trim(strip_tags(getStr($img_data[1], '\"', '\"')));
+    }
+    $x = trim(strip_tags(getStr($img_data[1], '\"', '\"')));
     
-	if ($imagedata[0] != 1200 || $imagedata[1] != 700) {
-	    
-	    
-	    if($x == $article_image_url) {
-			echo '<b>Open Graph Image <a href="' .
-			$article_image_url .
-			'">URL</a>:</b> [' .
-			$style_open .
-			"" .
-			$imagedata[0] .
-			"x" .
-			$imagedata[1] .
-			"" .
-			$style_close .
-			"] → [Dimensions should be 1200 x 700]<br>";
-		}
-		else {
-		    echo '<b>Open Graph Image <a href="' .
-			$article_image_url .
-			'">URL</a>:</b> [' .
-			$style_open .
-			"" .
-			$imagedata[0] .
-			"x" .
-			$imagedata[1] .
-			"" .
-			$style_close .
-			"] → [Use Image Source URL[1] as Open Graph Image URL] → [Dimensions should be 1200 x 700]<br>";
-		}
-		
-		
-		
-	} 
-	else {
-		if($x == $article_image_url) {
-			echo '<b>Open Graph Image <a href="' .
-				$article_image_url .
-				'">URL</a>:</b> [' .
-				$imagedata[0] .
-				"x" .
-				$imagedata[1] .
-				"] <br>";
-		}
-		else {
-			echo '<b>Open Graph Image <a href="' .
-			$article_image_url .
-			'">URL</a>:</b> [' .
-			$imagedata[0] .
-			"x" .
-			$imagedata[1] .
-			"]".$style_open. "→ [Use Image Source URL[1] as Open Graph Image URL]<br>".
-			$style_close;
-		}
-	}
-} else {
-	echo "<b>Open Graph Image " .
-		$style_open .
-		"URL" .
-		$style_close .
-		" :</b> [" .
-		$style_open .
-		"" .
-		$imagedata[0] .
-		"x" .
-		$imagedata[1] .
-		"" .
-		$style_close .
-		"] → Use Image Source URL[1] as Open Graph Image URL → [Dimensions should be 1200 x 700]<br>";
+    if ($imagedata[0] != 1200 || $imagedata[1] != 700) {
+        
+        
+        if($x == $article_image_url) {
+            echo '<b>Open Graph Image <a href="' .
+            $article_image_url .
+            '">URL</a>:</b> [' .
+            $style_open .
+            "" .
+            $imagedata[0] .
+            "x" .
+            $imagedata[1] .
+            "" .
+            $style_close .
+            "] → [Dimensions should be 1200 x 700]<br>";
+        }
+        else {
+            echo '<b>Open Graph Image <a href="' .
+            $article_image_url .
+            '">URL</a>:</b> [' .
+            $style_open .
+            "" .
+            $imagedata[0] .
+            "x" .
+            $imagedata[1] .
+            "" .
+            $style_close .
+            "] → [Use Image Source URL[1] as Open Graph Image URL] → [Dimensions should be 1200 x 700]<br>";
+        }
+    } 
+    else {
+        if($x == $article_image_url) {
+            echo '<b>Open Graph Image <a href="' .
+                $article_image_url .
+                '">URL</a>:</b> [' .
+                $imagedata[0] .
+                "x" .
+                $imagedata[1] .
+                "] <br>";
+        }
+        else {
+            echo '<b>Open Graph Image <a href="' .
+            $article_image_url .
+            '">URL</a>:</b> [' .
+            $imagedata[0] .
+            "x" .
+            $imagedata[1] .
+            "]".$style_open. "→ [Use Image Source URL[1] as Open Graph Image URL]<br>".
+            $style_close;
+        }
+    }
+} 
+else {
+    echo "<b>Open Graph Image " .
+        $style_open .
+        "URL" .
+        $style_close .
+        " :</b> [" .
+        $style_open .
+        "" .
+        $imagedata[0] .
+        "x" .
+        $imagedata[1] .
+        "" .
+        $style_close .
+        "] → Use Image Source URL[1] as Open Graph Image URL → [Dimensions should be 1200 x 700]<br>";
 }
 
 $img_src_count = substr_count($result, 'src=\"');
@@ -271,13 +278,8 @@ echo "<div>---------------------------------------------------------------------
 
 
 for ($array_index = 1; $array_index <= $img_src_count; $array_index++) {
-    $img_src[$array_index - 1] = trim(
-        strip_tags(getStr($img_data[$array_index], '\"', '\"'))
-    );
-    $img_alt[$array_index - 1] = trim(
-        strip_tags(getStr($img_data[$array_index], 'alt=\"', '\"'))
-    );
-   
+    $img_src[$array_index - 1] = trim(strip_tags(getStr($img_data[$array_index], '\"', '\"')));
+    $img_alt[$array_index - 1] = trim(strip_tags(getStr($img_data[$array_index], 'alt=\"', '\"')));
     
     if ($img_alt[$array_index - 1]) {
         echo '<div style="margin-left: 40px;">Image Source <a href="' .
@@ -290,22 +292,16 @@ for ($array_index = 1; $array_index <= $img_src_count; $array_index++) {
         $imgxx = get_headers($img_src[$array_index - 1], 1);
         $imgSize = round($imgxx["Content-Length"] / 1024, 2);
         list($width, $height) = getimagesize($img_src[$array_index - 1]);
+
+        if($array_index == 1 && ($width != 1200 || $height !=700)) {
+            $width = '<span style="color: red;">'.$width.'</span>';
+            $height = '<span style="color: red;">'.$height.'</span>';
+        }
         
-        
-         if($array_index == 1 && ($width != 1200 || $height !=700)) {
-             $width = '<span style="color: red;">'.$width.'</span>';
-             $height = '<span style="color: red;">'.$height.'</span>';
-         }
-        
-        //if($array_index != 1 && $width > 700) {
-          //  $width = '<span style="color: red;">'.$width.'</span>';
-        //}
-        
-        
-        
-        
-        
-        
+        if($array_index != 1 && $width > 700) {
+            $width = '<span style="color: red;">'.$width.'</span>';
+        }
+
         echo "<span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Size = " .
             $imgSize .
             "KB | Dimensions = " .
@@ -316,7 +312,8 @@ for ($array_index = 1; $array_index <= $img_src_count; $array_index++) {
         if ($imgSize > 100) {
             echo '<span style="color: red;"> → [Reduce the image size below 100KB]<br></span>';
         } 
-    } else {
+    } 
+    else {
         echo '<div style="margin-left: 40px;">Image Source <a href="' .
             $img_src[$array_index - 1] .
             '">URL[' .
@@ -337,10 +334,9 @@ for ($array_index = 1; $array_index <= $img_src_count; $array_index++) {
              $height = '<span style="color: red;">'.$height.'</span>';
         }
          
-         
-        //if($array_index != 1 && $width > 700) {
-          //  $width = '<span style="color: red;">'.$width.'</span>';
-        //}
+        if($array_index != 1 && $width > 700) {
+           $width = '<span style="color: red;">'.$width.'</span>';
+        }
         
         echo '<span style="margin-left: 40px;">Size = ' .
             $imgSize .
@@ -356,10 +352,6 @@ for ($array_index = 1; $array_index <= $img_src_count; $array_index++) {
     echo "<div>------------------------------------------------------------------------------------------------------------------------</div>";
 }
 
-
-
-
-
 $backlink_count = substr_count($result, 'href=\"');
 echo "<b>Backlink Data:</b><br>";
 for ($array_index = 0; $array_index <= $backlink_count; $array_index++) {
@@ -371,16 +363,11 @@ for ($array_index = 0; $array_index <= $backlink_count; $array_index++) {
 $slash_blog = "https://www.codingninjas.com/blog/";
 
 for ($array_index = 1; $array_index <= $backlink_count; $array_index++) {
-    $backlink_href[$array_index - 1] = trim(
-        strip_tags(getStr($backlink_data[$array_index], '\"', '\"'))
+    $backlink_href[$array_index - 1] = trim(strip_tags(getStr($backlink_data[$array_index], '\"', '\"'))
     );
 
     if (strpos($backlink_data[$array_index], "\u003cu\u003e") !== false) {
-        $backlink_text[$array_index - 1] = trim(
-            strip_tags(
-                getStr($backlink_data[$array_index], "\u003cu\u003e", "\u003c/")
-            )
-        );
+        $backlink_text[$array_index - 1] = trim(strip_tags(getStr($backlink_data[$array_index], "\u003cu\u003e", "\u003c/")));
 
         if (strpos($backlink_href[$array_index - 1], $slash_blog) !== false) {
             echo '<div style="margin-left: 40px;">' .
@@ -392,25 +379,17 @@ for ($array_index = 1; $array_index <= $backlink_count; $array_index++) {
                 "]" .
                 $style_close .
                 "</div>";
-        } else {
+        } 
+        else {
             echo '<div style="margin-left: 40px;">' .
                 $backlink_href[$array_index - 1] .
                 " → [text=" .
                 json_decode('"' . $backlink_text[$array_index - 1]. '"') .
                 "]</div>";
         }
-    } elseif (
-        strpos($backlink_data[$array_index], "\u003cstrong\u003e") !== false
-    ) {
-        $backlink_text[$array_index - 1] = trim(
-            strip_tags(
-                getStr(
-                    $backlink_data[$array_index],
-                    "\u003cstrong\u003e",
-                    "\u003c/"
-                )
-            )
-        );
+    } 
+    elseif (strpos($backlink_data[$array_index], "\u003cstrong\u003e") !== false) {
+        $backlink_text[$array_index - 1] = trim(strip_tags(getStr($backlink_data[$array_index], "\u003cstrong\u003e", "\u003c/")));
 
         if (strpos($backlink_href[$array_index - 1], $slash_blog) !== false) {
             echo '<div style="margin-left: 40px;">' .
@@ -422,29 +401,18 @@ for ($array_index = 1; $array_index <= $backlink_count; $array_index++) {
                 "]" .
                 $style_close .
                 "</div>";
-        } else {
+        } 
+        else {
             echo '<div style="margin-left: 40px;">' .
                 $backlink_href[$array_index - 1] .
                 " → [text=" .
                 json_decode('"' . $backlink_text[$array_index - 1]. '"') .
                 "]</div>";
         }
-    } else {
-        $backlink_text[$array_index - 1] = trim(
-            strip_tags(
-                getStr(
-                    $backlink_data[$array_index],
-                    "" . $backlink_href[$array_index - 1] . '\"\u003e',
-                    "\u003c/"
-                )
-            )
-        );
-
-        $backlink_text[$array_index - 1] = trim(
-            strip_tags(
-                getStr($backlink_text[$array_index - 1], "\u003e", "\u003c/")
-            )
-        );
+    } 
+    else {
+        $backlink_text[$array_index - 1] = trim(strip_tags(getStr($backlink_data[$array_index], "" . $backlink_href[$array_index - 1] . '\"\u003e', "\u003c/")));
+        $backlink_text[$array_index - 1] = trim(strip_tags(getStr($backlink_text[$array_index - 1], "\u003e", "\u003c/")));
 
         if (strpos($backlink_href[$array_index - 1], $slash_blog) !== false) {
             echo '<div style="margin-left: 40px;">' .
@@ -456,7 +424,8 @@ for ($array_index = 1; $array_index <= $backlink_count; $array_index++) {
                 "]" .
                 $style_close .
                 "</div>";
-        } else {
+        } 
+        else {
             echo '<div style="margin-left: 40px;">' .
                 $backlink_href[$array_index - 1] .
                 " → [text=" .
@@ -466,17 +435,14 @@ for ($array_index = 1; $array_index <= $backlink_count; $array_index++) {
     }
 }
 
-
 echo "<b>Frequently Asked Questions:</b> ";
-echo "<div>------------------------------------------------------------------------------------------------------------------------</div>";
-echo "<i>[Add 1 to the word count for each instances of O(n^aNumber) or O(aNumber).]</i>";
-echo "<div>------------------------------------------------------------------------------------------------------------------------</div>";
 
 $key_count = substr_count($faqs, '":"');
 
 if ($key_count < 3) {
     echo "" . $style_open . "Add 3-5 FAQs" . $style_close . "<br>";
-} else {
+} 
+else {
     echo "<br>";
 }
 
@@ -484,53 +450,32 @@ for ($array_index = 1; $array_index <= $key_count; $array_index++) {
     $qna[$array_index] = multiexplode(['":"'], $faqs)[$array_index];
 }
 
-for (
-    $array_index = 2;
-    $array_index <= $key_count;
-    $array_index = $array_index + 2
-) {
+for ($array_index = 2; $array_index <= $key_count; $array_index = $array_index + 2) {
     $qna_no = $array_index / 2;
     $qno[$qna_no - 1] = $qna[$array_index];
     $salt = "sanchit";
     $qna[$array_index] = $salt . $qna[$array_index];
-    $qna[$array_index] = trim(
-        strip_tags(getStr($qna[$array_index], "sanchit", '"}'))
-    );
+    $qna[$array_index] = trim(strip_tags(getStr($qna[$array_index], "sanchit", '"}')));
     
     $styleo = '<redmark style="background-color: yellow; color: red;">';
     $stylex = "</redmark>";
     
-    $qna[$array_index] = str_replace(
-        '\n',
-        "" . $styleo . '\n' . $stylex . "",
-        $qna[$array_index]
-    );
-    //$qna[$array_index] = json_decode('"' . $qna[$array_index]. '"');
+    $qna[$array_index] = str_replace('\n', "" . $styleo . '\n' . $stylex . "", $qna[$array_index]);
+
     echo '<div style="margin-left: 40px;">⚪' . $qna[$array_index]."</div>";
 
     $ano[$qna_no - 1] = $qna[$array_index - 1];
     $quote = '"';
     $qna[$array_index - 1] = $salt . $qna[$array_index - 1] . $quote;
-    $qna[$array_index - 1] = trim(
-        strip_tags(getStr($qna[$array_index - 1], "sanchit", '",'))
-    );
-    //echo $qna[$array_index - 1];
-    
+    $qna[$array_index - 1] = trim(strip_tags(getStr($qna[$array_index - 1], "sanchit", '",')));
+
     $answerf = json_decode('"' . $qna[$array_index - 1]. '"');
-    //$words = preg_split('/\s+/', $answerf);
     $wordCount = str_word_count($answerf);
     
-    
-    $qna[$array_index - 1] = str_replace(
-        '\n',
-        "" . $styleo . '\n' . $stylex . "",
-        $qna[$array_index - 1]
-    );
-    
-    
-    
+    $qna[$array_index - 1] = str_replace('\n', "" . $styleo . '\n' . $stylex . "", $qna[$array_index - 1]);
+
     echo '<div style="margin-left: 40px;">⚫' .
-         $qna[$array_index - 1] .' → [<strong><redmark style="background-color: yellow; color: blue;">'.$wordCount.' words</redmark></strong>]'.
+        $qna[$array_index - 1] .' → [<strong><redmark style="background-color: yellow; color: blue;">'.$wordCount.' words</redmark></strong>]'.
         "</div>";
 }
 
