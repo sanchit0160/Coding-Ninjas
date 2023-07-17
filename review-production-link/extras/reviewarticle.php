@@ -42,8 +42,21 @@ $result = curl_exec($ch);
 $json = json_decode($result);
 $content = $json->data->article->content;
 
+$content = preg_replace('/<a[^>]*>.*?<\/a>/', '', $content);
+preg_match_all('/<(h[1-6]|span)[^>]*?color:(?!#000000)[^;]*?;">(?!<a[^>]*>)(.*?)<\/\1>/s', $content, $matches);
 
 echo '<a href="'.$list .'">'.$list."</a><br>";
+echo "<br><div><b><mark>The following box contains text which is not written in black[#000000] in the whole article. Till now, I have not added code to exclude text which is written in hsl(0,0%,0%).</mark></b></div> [Both #000000 and hsl(0,0%,0%) visually appear the same, but the first one is based on the RGB model, and the second one is based on the Hue-Saturation-Lightness model.]";
+echo '<br><div class="box">';
+
+
+foreach ($matches[2] as $match) {
+    if(!($match == "")) {
+        echo $match . "<br>";
+    }
+}
+
+echo '</div>';
 echo "<div><b>Table of Contents:</b></div>";
 echo '<div class="box">';
 
