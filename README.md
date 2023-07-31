@@ -4,9 +4,11 @@
 
 ## Table of Contents
 
-- [Coding Ninjas - SEO Internal Linking](#internal-linking)
-- [Coding Ninjas - Review Production Link](#review-production-link)
----
+- [Coding Ninjas - SEO Internal Linking](https://sanchit0160.github.io/internal-linking/)
 
-## internal-linking
-## review-production-link
+  ##
+- [Coding Ninjas - Review Production Link](#review-production-link)
+
+
+
+---
